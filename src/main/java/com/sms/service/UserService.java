@@ -12,9 +12,8 @@ import org.springframework.stereotype.Service;
 @CacheConfig(cacheNames = "userCache")
 public class UserService {
 
-    @Cacheable
+    @Cacheable(keyGenerator = "wiselyKeyGenerator")
     public User getUserByName(String name) {
-        System.out.println("== usercache 初始化 ==");
         User user = new User();
         user.setName(name);
         return user;

@@ -14,9 +14,7 @@
 
 
     <!-- 扫描注解Bean -->
-    <context:component-scan base-package="com.sms">
-        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
-    </context:component-scan>
+    <context:component-scan base-package="com.sms"/>
 
     <!-- 外部资源文件 -->
     <bean id="propertyConfigurer"
@@ -101,54 +99,5 @@
         <aop:advisor advice-ref="txAdvice" pointcut-ref="txPointcut"/>
     </aop:config>
 
-    <!--redis config-->
-    <bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">
-        <property name="maxIdle" value="${redis.maxIdle}"/>
-        <property name="minIdle" value="${redis.minIdle}"/>
-        <property name="maxTotal" value="${redis.maxTotal}"/>
-        <property name="testOnBorrow" value="true"/>
-    </bean>
 
-    <bean id="jedisShardInfo" class="redis.clients.jedis.JedisShardInfo">
-        <constructor-arg index="0" value="${redis.host}"/>
-        <constructor-arg index="1" value="${redis.port}" type="int"/>
-    </bean>
-
-    <bean id="shardedJedisPool" class="redis.clients.jedis.ShardedJedisPool">
-        <constructor-arg index="0" ref="jedisPoolConfig"/>
-        <constructor-arg index="1">
-            <list>
-                <ref bean="jedisShardInfo"/>
-            </list>
-        </constructor-arg>
-    </bean>
-
-    <!--注解 cache key生成-->
-    <bean id="wiselyKeyGenerator" class="com.sms.redis.WiselyKeyGenerator"/>
-
-    <!-- Redis连接 -->
-    <bean id="jedisConnFactory"
-          class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory"
-          p:shardInfo-ref="jedisShardInfo" p:poolConfig-ref="jedisPoolConfig"/>
-
-    <bean id="keySerializer" class="org.springframework.data.redis.serializer.StringRedisSerializer"/>
-
-    <bean id="valueSerializer" class="org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer">
-        <constructor-arg index="0" name="type">
-            <value>java.lang.Object</value>
-        </constructor-arg>
-    </bean>
-
-    <bean id="redisTemplate" class="org.springframework.data.redis.core.RedisTemplate">
-        <property name="connectionFactory" ref="jedisConnFactory"/>
-        <property name="keySerializer" ref="keySerializer"/>
-        <property name="valueSerializer" ref="valueSerializer"/>
-        <property name="hashKeySerializer" ref="keySerializer"/>
-        <property name="hashValueSerializer" ref="valueSerializer"/>
-    </bean>
-
-    <bean id="redisCacheManager" class="org.springframework.data.redis.cache.RedisCacheManager">
-        <constructor-arg index="0" ref="redisTemplate"/>
-        <property name="defaultExpiration" value="${redis.timeout}"/>
-    </bean>
 </beans>

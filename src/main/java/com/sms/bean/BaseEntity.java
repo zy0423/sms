@@ -1,8 +1,5 @@
 package com.sms.bean;
 
-/**
- * Created by zy on 2016/5/27.
- */
 
 import java.io.Serializable;
 

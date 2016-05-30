@@ -12,17 +12,16 @@
        http://www.springframework.org/schema/tx
        http://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
 
-
-    <!-- 扫描注解Bean -->
-    <context:component-scan base-package="com.sms"/>
-
+	<context:component-scan base-package="com.sms">
+        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+    </context:component-scan>
+    
     <!-- 外部资源文件 -->
     <bean id="propertyConfigurer"
           class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
         <property name="locations">
             <list>
-                <value>classpath:jdbc.properties</value>
-                <value>classpath:redis.properties</value>
+                <value>classpath:application.properties</value>
             </list>
         </property>
     </bean>
@@ -62,6 +61,12 @@
 
     <!--开启注解事务 只对当前配置文件有效-->
     <tx:annotation-driven transaction-manager="txManager"/>
+
+    <!-- 自动扫描映射器 -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.sms.mapper" />
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"></property>
+    </bean>
 
     <!--事物配置-->
     <bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">

@@ -1,0 +1,79 @@
+<?xml version="1.1" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context" xsi:schemaLocation="
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+		http://www.springframework.org/schema/context  http://www.springframework.org/schema/context/spring-context-4.0.xsd"
+       default-lazy-init="true">
+
+    <description>Shiro安全配置</description>
+
+    <!-- 读取配置文件 -->
+    <context:property-placeholder ignore-unresolvable="true" location="classpath*:/application.properties" />
+
+    <!-- Shiro Filter -->
+    <bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+        <property name="securityManager" ref="securityManager" />
+        <property name="loginUrl" value="/login" />
+        <property name="successUrl" value="/admin" />
+        <property name="unauthorizedUrl" value="/index"/>
+        <property name="filterChainDefinitions">
+            <value>
+                /static/** = anon
+                /login = authc
+                /seesion/** = authc
+                /admin/** = user
+            </value>
+        </property>
+    </bean>
+
+    <!-- Shiro的主要业务层对象基于web的应用程序 -->
+    <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+        <property name="realm" ref="userRealm" />
+        <property name="cacheManager" ref="redisCacheManager" />
+    </bean>
+
+    <bean id="userRealm" class="com.sms.realm.ShiroRealmImpl">
+        <property name="credentialsMatcher" ref="credentialsMatcher"/>
+    </bean>
+
+    <!-- 用户授权信息Cache, 采用redis -->
+    <bean id="redisCacheManager" class="org.crazycake.shiro.RedisCacheManager">
+        <property name="redisManager" ref="redisManager"/>
+    </bean>
+
+    <bean id="redisManager" class="org.crazycake.shiro.RedisManager">
+        <property name="host" value="${redis.host}"/>
+        <property name="port" value="${redis.port}"/>
+        <property name="expire" value="${redis.expireTime}"/>
+        <property name="timeout" value="${redis.timeout}"/>
+    </bean>
+
+    <bean id="credentialsMatcher" class="org.apache.shiro.authc.credential.PasswordMatcher">
+        <property name="passwordService" ref="passwordService"/>
+    </bean>
+
+    <bean id="passwordService" class="org.apache.shiro.authc.credential.DefaultPasswordService"/>
+
+    <bean id="simpleCookie" class="org.apache.shiro.web.servlet.SimpleCookie">
+        <property name="name" value="WAPSESSIONID"/>
+        <property name="httpOnly" value="${shiro.cookie.httpOnly}"/>
+        <property name="maxAge" value="${shiro.cookie.maxAge}"/>
+    </bean>
+
+    <bean id="rememberMeManager" class="org.apache.shiro.web.mgt.CookieRememberMeManager">
+        <property name="cookie" ref="simpleCookie"/>
+    </bean>
+
+    <!-- 保证实现了Shiro内部lifecycle函数的bean执行 -->
+    <bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor"/>
+
+    <!-- AOP式方法级权限检查  -->
+    <bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator" depends-on="lifecycleBeanPostProcessor">
+        <property name="proxyTargetClass" value="true" />
+    </bean>
+
+    <bean class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">
+        <property name="securityManager" ref="securityManager"/>
+    </bean>
+
+</beans>

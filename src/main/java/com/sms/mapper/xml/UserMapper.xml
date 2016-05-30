@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sms.mapper.UserMapper">
+
+    <select id="findUserById" resultType="com.sms.bean.User" parameterType="java.lang.Integer">
+        SELECT * FROM sys_user WHERE id = #{id}
+    </select>
+
+    <select id="findUserByName" resultType="com.sms.bean.User" parameterType="java.lang.String">
+        SELECT * FROM sys_user WHERE name = #{name}
+    </select>
+
+    <select id="selectAll" parameterType="com.sms.bean.User" resultType="java.util.ArrayList">
+        SELECT * FROM sys_user
+    </select>
+
+    <insert id="add" parameterType="com.sms.bean.User" useGeneratedKeys="true"   keyProperty="id">
+        insert into sys_user (name,password,email) values(#{name},#{password},#{email})
+    </insert>
+
+    <delete id="delete" parameterType="java.lang.Integer">
+        delete from sys_user where id=#{id}
+    </delete>
+
+    <update id="update" parameterType="com.sms.bean.User">
+        update sys_user set name = #{name},password = #{password},email = #{email},salt = #{salt},locked = #{locked}
+    </update>
+</mapper>

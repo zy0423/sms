@@ -21,7 +21,7 @@ public class HelloController
 	public ModelAndView main(HttpServletRequest request, HttpServletResponse response)
 	{
 		ModelAndView model = new ModelAndView("index");
-		userService.getUserByName("zhang");
+		userService.getUserByName("admin");
 		return model;
 	}
 }

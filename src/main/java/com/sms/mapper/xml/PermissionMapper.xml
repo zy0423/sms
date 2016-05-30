@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sms.mapper.PermissionMapper">
+
+    <select id="findPermissionById" parameterType="java.lang.Integer" resultType="com.sms.bean.Permission">
+        SELECT * FROM sys_permission WHERE id = #{id}
+    </select>
+
+    <select id="findPermissions" parameterType="com.sms.bean.Permission" resultType="java.util.HashSet">
+        SELECT p.permission FROM sys_permission p INNER JOIN (SELECT rp.permission_id FROM sys_user u INNER JOIN sys_user_role ur ON u.id = ur.user_id INNER JOIN sys_role_permission rp ON ur.role_id = rp.role_id WHERE u.name = #{username}) b ON p.id = b.permission_id
+    </select>
+
+    <select id="selectAll" parameterType="com.sms.bean.Permission" resultType="java.util.ArrayList">
+        SELECT * FROM sys_permission
+    </select>
+
+    <insert id="add" parameterType="com.sms.bean.Permission"  useGeneratedKeys="true"   keyProperty="id">
+        insert into sys_permission (permission,description,available) values(#{permission},#{description},#{available})
+    </insert>
+
+    <delete id="delete" parameterType="java.lang.Integer">
+        delete from sys_permission where id=#{id}
+    </delete>
+
+    <update id="update" parameterType="com.sms.bean.Permission">
+        update sys_permission set permission = #{permission},description = #{description},available = #{available} where id = #{id}
+    </update>
+
+</mapper>
